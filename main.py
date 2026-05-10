@@ -206,6 +206,17 @@ def write_channels_data(data):
     with open(CHANNELS_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
+# Premium checker
+def is_premium_user(user_id):
+    user_id = str(user_id)
+
+    # Admin always premium
+    if user_id == str(YOUR_ADMIN_ID):
+        return True
+
+    subscription_data = read_subscription_data()
+
+    return any(user[0] == user_id for user in subscription_data)
 
 # Admin-only decorator
 def admin_only(func):
@@ -406,11 +417,14 @@ async def stop_handler(client, message: Message):
 @bot.on_message(filters.command("saini"))
 async def moni_handler(client: Client, m: Message):
     if m.chat.type == "private":
-        user_id = str(m.from_user.id)
-        subscription_data = read_subscription_data()
-        if not any(user[0] == user_id for user in subscription_data):
-            await m.reply_text("❌ You are not a premium user. Please upgrade your subscription! 💎")
-            return
+
+    user_id = str(m.from_user.id)
+
+    if not is_premium_user(user_id):
+        await m.reply_text(
+            "❌ You are not a premium user. Please upgrade your subscription! 💎"
+        )
+        return
     else:
         channels = read_channels_data()
         if str(m.chat.id) not in channels:
