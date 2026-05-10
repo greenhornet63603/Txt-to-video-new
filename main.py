@@ -414,25 +414,35 @@ async def stop_handler(client, message: Message):
     await message.reply_text("♦️ 𝐒𝐭𝐨𝐩𝐩𝐞𝐝 Baby💞 ♦️" , True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
-@bot.on_message(filters.command("saini"))
+@bot.on_message(filters.command("upload"))
 async def moni_handler(client: Client, m: Message):
+
     if m.chat.type == "private":
 
-    user_id = str(m.from_user.id)
+        user_id = str(m.from_user.id)
 
-    if not is_premium_user(user_id):
-        await m.reply_text(
-            "❌ You are not a premium user. Please upgrade your subscription! 💎"
-        )
-        return
-    else:
-        channels = read_channels_data()
-        if str(m.chat.id) not in channels:
-            await m.reply_text("❗ You are not a premium user. Subscribe now for exclusive access! 🚀")
+        if not is_premium_user(user_id):
+            await m.reply_text(
+                "❌ You are not a premium user. Please upgrade your subscription! 💎"
+            )
             return
-            
-    editable = await m.reply_text('𝐓𝐨 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 𝐀 𝐓𝐱𝐭 𝐅𝐢𝐥𝐞 𝐒𝐞𝐧𝐝 𝐇𝐞𝐫𝐞 ⏍')
 
+    else:
+
+        channels = read_channels_data()
+
+        if (
+            str(m.chat.id) not in channels
+            and str(m.from_user.id) != str(YOUR_ADMIN_ID)
+        ):
+            await m.reply_text(
+                "❗ You are not a premium user. Subscribe now for exclusive access! 🚀"
+            )
+            return
+
+    editable = await m.reply_text(
+        '𝐓𝐨 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 𝐀 𝐓𝐱𝐭 𝐅𝐢𝐥𝐞 𝐒𝐞𝐧𝐝 𝐇𝐞𝐫𝐞 ⏍'
+    )
     try:
         input: Message = await client.listen(editable.chat.id)
         
@@ -706,4 +716,24 @@ async def moni_handler(client: Client, m: Message):
         await m.reply_text(e)
     await m.reply_text("🔰Done Hero💞")
 
-bot.run()
+from aiohttp import web
+
+async def main():
+    await bot.start()
+
+    app = await web_server()
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+
+    port = int(os.environ.get("PORT", 10000))
+
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
+    print(f"Bot running on port {port}")
+
+    while True:
+        await asyncio.sleep(3600)
+
+asyncio.run(main())
